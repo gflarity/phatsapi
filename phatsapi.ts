@@ -1,40 +1,41 @@
-// Import necessary modules
-import { Hono } from 'npm:hono'; 
-import { describeRoute, openAPISpecs } from 'npm:hono-openapi';
+import { Hono } from "npm:hono";
+import { openAPISpecs, describeRoute } from 'npm:hono-openapi@0.3.1';
 import { resolver, validator as zValidator } from 'npm:hono-openapi/zod';
+import { OpenApiSpecsOptions } from './hono-openapi-types.ts';
+  
 import { z } from 'npm:zod';
 
-import { extendZodWithOpenApi } from 'npm:zod-openapi'
-extendZodWithOpenApi(z)
+import { extendZodWithOpenApi } from 'npm:zod-openapi';
+extendZodWithOpenApi(z);
 
-// Define RouteDefinition type if not already defined
-type RouteDefinition = any; // Replace with actual definition
-
-// PhatsAPI class
+/**
+ * PhatsAPI class for creating RESTful APIs using Hono framework with OpenAPI support.
+ *
+ * This class simplifies the process of defining routes, handling requests, and generating OpenAPI documentation.
+ */
 export class PhatsAPI {
-    private hono = new Hono();
-    private routes: RouteDefinition[] = [];
+    private hono: Hono;
 
-    constructor() {
+    /**
+     * Constructor for PhatsAPI.
+     *
+     * @param openapiOptions - Optional parameters to configure the OpenAPI documentation.
+     * @example
+     * const api = new PhatsAPI({
+     *   documentation: {
+     *     info: {
+     *       title: 'My API',
+     *       version: '1.0.0',
+     *     },
+     *   },
+     * });
+     */
+    constructor(openapiOptions: OpenApiSpecsOptions) {
+        this.hono = new Hono();
         this.fetch = this.fetch.bind(this);
         this.hono.get(
             "/openapi",
-            openAPISpecs(this.hono, {
-                documentation: {
-                    info: {
-                        title: "Hono",
-                        version: "1.0.0",
-                        description: "API for greeting users",
-                    },
-                    servers: [
-                        {
-                            // TODO determine this
-                            url: "http://localhost:3000",
-                            description: "Local server",
-                        },
-                    ],
-                },
-            })
+            openAPISpecs(this.hono, openapiOptions),
         );
     }
 
@@ -74,7 +75,7 @@ export class PhatsAPI {
                 const query = c.req.valid('query');
                 const response = await handler(query);
                 return c.json(responseSchema.parse(response));
-            }
+            },
         );
     }
 
@@ -96,7 +97,6 @@ export class PhatsAPI {
         handler: (req: z.infer<RequestSchema>) => Promise<z.infer<ResponseSchema>>,
         responseDescription: string = "Successful response",
     ): void {
-
         this.hono.post(
             path,
             describeRoute({
@@ -115,10 +115,96 @@ export class PhatsAPI {
                 const body = c.req.valid('json');
                 const response = await handler(body);
                 return c.json(responseSchema.parse(response), 200);
-            }
+            },
         );
     }
 
+    /**
+     * PUT method to handle updating resources.
+     *
+     * @param path - The route path.
+     * @param requestSchema - Zod schema for validating the request body.
+     * @param responseSchema - Zod schema for validating the response body.
+     * @param description - Description of the route for documentation.
+     * @param handler - Async function that handles the request and returns the response.
+     * @param responseDescription - Description of the successful response.
+     */
+    public put<RequestSchema extends z.ZodTypeAny, ResponseSchema extends z.ZodTypeAny>(
+        path: string,
+        requestSchema: RequestSchema,
+        responseSchema: ResponseSchema,
+        description: string,
+        handler: (req: z.infer<RequestSchema>) => Promise<z.infer<ResponseSchema>>,
+        responseDescription: string = "Successful response",
+    ): void {
+        this.hono.put(
+            path,
+            describeRoute({
+                description: description,
+                responses: {
+                    200: {
+                        description: responseDescription,
+                        content: {
+                            'application/json': { schema: resolver(responseSchema) },
+                        },
+                    },
+                },
+            }),
+            zValidator('json', requestSchema),
+            async (c) => {
+                const body = c.req.valid('json');
+                const response = await handler(body);
+                return c.json(responseSchema.parse(response));
+            },
+        );
+    }
+
+    /**
+     * DELETE method to handle deleting resources.
+     *
+     * @param path - The route path.
+     * @param requestSchema - Zod schema for validating the query parameters or request body (optional).
+     * @param responseSchema - Zod schema for validating the response body.
+     * @param description - Description of the route for documentation.
+     * @param handler - Async function that handles the request and returns the response.
+     * @param responseDescription - Description of the successful response.
+     */
+    public delete<RequestSchema extends z.ZodTypeAny, ResponseSchema extends z.ZodTypeAny>(
+        path: string,
+        requestSchema: RequestSchema,
+        responseSchema: ResponseSchema,
+        description: string,
+        handler: (req: z.infer<RequestSchema>) => Promise<z.infer<ResponseSchema>>,
+        responseDescription: string = "Successful response",
+    ): void {    
+        this.hono.delete(
+            path,
+            describeRoute({
+                description: description,
+                responses: {
+                    200: {
+                        description: responseDescription,
+                        content: {
+                            'application/json': { schema: resolver(responseSchema) },
+                        },
+                    },
+                },
+            }),
+            zValidator('json', requestSchema),
+            async (c) => {
+                const validatedData = c.req.valid('json')
+                const response = await handler(validatedData);
+                return c.json(responseSchema.parse(response));
+            },
+        );
+    }
+
+    /**
+     * Handles fetch requests for the Hono application.
+     *
+     * @param args - Arguments passed to the Hono fetch method.
+     * @returns The response from the Hono application.
+     */
     public fetch(...args: Parameters<typeof Hono.prototype.fetch>): ReturnType<typeof Hono.prototype.fetch> {
         return this.hono.fetch(...args);
     }
