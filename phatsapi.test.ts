@@ -5,56 +5,6 @@ import { assertEquals, assertExists } from "jsr:@std/assert";
 
 extendZodWithOpenApi(z)
 
-// ----- Example Usage -----
-// Request schema for getting a user
-export const GetUserRequestSchema = z
-  .object({
-    userId: z
-      .string()
-      .uuid()
-      .openapi({
-        param: {
-            name: 'userId',
-            in: 'path',
-        },
-        description: "Unique identifier for the user to be fetched.",
-        example: "f47ac10b-58cc-4372-a567-0e02b2c3d479",        
-      }),
-  })
-  .openapi({ ref: "GetUserRequest" }); // Assign a unique name for referencing
-
-// Response schema for getting a user
-export const GetUserResponseSchema = z
-  .object({
-    userId: z
-      .string()
-      .uuid()
-      .openapi({
-        description: "Unique identifier for the user.",
-        example: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-      }),
-    name: z
-      .string()
-      .openapi({
-        description: "Name of the user.",
-        example: "John Doe",
-      }),
-    email: z
-      .string()
-      .email()
-      .openapi({
-        description: "Email address of the user.",
-        example: "john.doe@example.com",
-      }),
-    isActive: z
-      .boolean()
-      .openapi({
-        description: "Indicates if the user is active.",
-        example: true,
-      }),
-  })
-  .openapi({ ref: "GetUserResponse"}); // Assign a unique name for referencing
-
 // Test cases (in phats-api.test.ts)
 Deno.test("PhatsAPI GET method", async () => {
     const api = new PhatsAPI({
@@ -138,13 +88,12 @@ Deno.test("PhatsAPI POST method normal", async () => {
     const api = new PhatsAPI({
         documentation: {
             info: {
-                title: "Hono",
+                title: "PhatsAPI",
                 version: "1.0.0",
                 description: "API for greeting users",
             },
             servers: [
                 {
-                    // TODO determine this
                     url: "http://localhost:3000",
                     description: "Local server",
                 },
@@ -179,11 +128,91 @@ Deno.test("PhatsAPI POST method normal", async () => {
     assertEquals(body, { id: 1, name: "Jane Doe" })
 })
 
+Deno.test("PhatsAPI POST method - path param", async () => {
+    const UpdateUserWithPathRequest = z.object({
+        userId: z.string().uuid().openapi({
+            param: {
+                name: 'userId',
+                in: 'path',
+            },
+            description: "Unique identifier for the user to be fetched.",
+            example: "f47ac10b-58cc-4372-a567-0e02b2c3d479",        
+        }),
+        name: z.string().openapi({
+            description: "Name of the user.",
+            example: "John Doe",
+        }),
+        email: z.string().email().openapi({
+            description: "Email address of the user.",
+            example: "john.doe@example.com",
+        }),
+        isActive: z.boolean().openapi({
+            description: "Indicates if the user is active.",
+            example: true,
+        }),
+    }).openapi({ ref: "GetUserRequest" }); // Assign a unique name for referencing
+
+    // Response schema for getting a user
+    const UpdateUserResponse = z.object({
+        userId: z.string().uuid().openapi({
+            description: "Unique identifier for the user.",
+            example: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        }),
+        name: z.string().openapi({
+            description: "Name of the user.",
+            example: "John Doe",
+        }),
+        email: z.string().email().openapi({
+            description: "Email address of the user.",
+            example: "john.doe@example.com",
+        }),
+        isActive: z.boolean().openapi({
+            description: "Indicates if the user is active.",
+            example: true,
+        }),
+    }).openapi({ ref: "GetUserResponse"}); // Assign a unique name for referencing
+
+    const api = new PhatsAPI({
+        documentation: {
+            info: {
+                title: "PhatsAPI",
+                version: "1.0.0",
+                description: "API for greeting users",
+            },
+            servers: [
+                {
+                    // TODO determine this
+                    url: "http://localhost:3000",
+                    description: "Local server",
+                },
+            ],
+        },
+    })
+
+    api.post(
+        "/users/:userId",
+        UpdateUserWithPathRequest,
+        UpdateUserResponse,
+        "Creates a new user",
+        async (req) => {
+            return { userId: req.userId, name: req.name,  email: req.email, isActive: req.isActive }
+        }
+    )
+    const res = await api.fetch(new Request("http://localhost:8080/users/f47ac10b-58cc-4372-a567-0e02b2c3d47a", {
+        method: "POST",
+        body: JSON.stringify({ name: "Jane Doe", email: "jane@doe.com", isActive: true }),
+        headers: { "Content-Type": "application/json" },
+    }))                
+    assertEquals(res.status, 200)
+
+
+})
+
 Deno.test("PhatsAPI POST method - invalid request", async () => {
     const api = new PhatsAPI({
         documentation: {
             info: {
-                title: "Hono",
+                title: "PhatsAPI",
                 version: "1.0.0",
                 description: "API for greeting users",
             },
@@ -227,7 +256,7 @@ Deno.test("PhatsAPI openapi endpoint", async () => {
     const api = new PhatsAPI({
         documentation: {
             info: {
-                title: "Hono",
+                title: "PhatsAPI",
                 version: "1.0.0",
                 description: "API for greeting users",
             },
@@ -248,12 +277,11 @@ Deno.test("PhatsAPI openapi endpoint", async () => {
     assertEquals(body.info.version, "1.0.0")
 })
 
-
 Deno.test("PhatsAPI PUT method - normal", async () => {
     const api = new PhatsAPI({
         documentation: {
             info: {
-                title: "User API",
+                title: "PhatsAPI",
                 version: "1.0.0",
                 description: "API for managing users",
             },
@@ -300,7 +328,7 @@ Deno.test("PhatsAPI PUT method - invalid request", async () => {
     const api = new PhatsAPI({
         documentation: {
             info: {
-                title: "User API",
+                title: "PhatsAPI",
                 version: "1.0.0",
                 description: "API for managing users",
             },
@@ -428,6 +456,5 @@ Deno.test("PhatsAPI DELETE method - invalid request", async () => {
         body: JSON.stringify({}), // Missing 'id' in the body
         headers: { "Content-Type": "application/json" },
     }));
-
     assertEquals(res.status, 400);
 });
