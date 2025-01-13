@@ -33,7 +33,7 @@ async function testRequest(
     expectedStatus: number,
     expectedBody?: unknown
 ) {
-    const res = await api.fetch(new Request(`http://localhost:8080${path}`, {
+    const res = await api.fetch(new Request(`http://localhost:3000${path}`, {
         method,
         ...requestOptions,
     }));

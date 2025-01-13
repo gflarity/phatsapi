@@ -4,7 +4,6 @@ import { resolver, validator as zValidator } from 'npm:hono-openapi/zod';
 import { OpenApiSpecsOptions } from './hono-openapi-types.ts';
 
 import { z } from 'npm:zod';
-
 import { extendZodWithOpenApi } from 'npm:zod-openapi';
 extendZodWithOpenApi(z);
 
