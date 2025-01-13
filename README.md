@@ -61,6 +61,14 @@ api.post(
   userSchema,
   'Create a new user',
   async (req) => {
+    // TypeScript automatically infers the type of `req` as:
+    // `z.infer<typeof createUserSchema>`
+    // which is equivalent to: { name: string; email: string; }
+
+    // The return type is also automatically inferred as:
+    // `z.infer<typeof userSchema>`
+    // which is equivalent to: { id: string; name: string; email: string; }
+
     // Replace this with your actual user creation logic
     const userId = 'user123'; // Generate a unique ID
     const user = {
@@ -81,6 +89,14 @@ api.put(
   userSchema,
   'Update a user',
   async (req) => {
+    // TypeScript automatically infers the type of `req` as:
+    // `z.infer<typeof updateUserSchema>`
+    // which is equivalent to: { id: string; name?: string | undefined; email?: string | undefined; }
+
+    // The return type is also automatically inferred as:
+    // `z.infer<typeof userSchema>`
+    // which is equivalent to: { id: string; name: string; email: string; }
+
     // Replace this with your actual user update logic
     const updatedUser = {
       id: req.id,
@@ -100,8 +116,16 @@ api.get(
   userSchema,
   'Get a user by ID',
   async (req) => {
+    // TypeScript automatically infers the type of `req` as:
+    // `z.infer<typeof requestSchema>`
+    // which is equivalent to: { id: string; }
+
+    // The return type is also automatically inferred as:
+    // `z.infer<typeof userSchema>`
+    // which is equivalent to: { id: string; name: string; email: string; }
+
     // Replace this with your actual data fetching logic
-    const user: z.infer<typeof userSchema> = {
+    const user = {
       id: req.id,
       name: 'John Doe',
       email: 'johndoe@example.com',
