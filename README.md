@@ -2,20 +2,20 @@
 
 # PhatsAPI - Deno API Framework
 
+Use Zod Schemas to quickly create an OpenAPI 3.0-compliant REST API in Deno.
+
 ## Setup
 
-Coming to JSR soon!
+import { PhatsAPI } from "@phatsapi/phatsapi"
 
 ## Example
 
-Use Zod Schemas to quickly create an OpenAPI 3.0-compliant REST API in Deno.
-
 ```ts
-import { PhatsAPI } from './phatsapi.ts';
-import { z } from 'npm:zod';
-import { extendZodWithOpenApi } from 'npm:zod-openapi';
+import { PhatsAPI } from './phatsapi.ts'
+import { z } from 'npm:zod'
+import { extendZodWithOpenApi } from 'npm:zod-openapi'
 
-extendZodWithOpenApi(z);
+extendZodWithOpenApi(z)
 
 const api = new PhatsAPI({
   documentation: {
@@ -30,29 +30,29 @@ const api = new PhatsAPI({
       },
     ],
   },
-});
+})
 
 // Define schemas for request and response
 const createUserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
-});
+})
 
 const updateUserSchema = z.object({
   id: z.string(),
   name: z.string().optional(),
   email: z.string().email().optional(),
-});
+})
 
 const requestSchema = z.object({
   id: z.string(),
-});
+})
 
 const userSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.string().email(),
-});
+})
 
 // Create a POST endpoint to create a user
 api.post(
@@ -70,17 +70,17 @@ api.post(
     // which is equivalent to: { id: string; name: string; email: string; }
 
     // Replace this with your actual user creation logic
-    const userId = 'user123'; // Generate a unique ID
+    const userId = 'user123' // Generate a unique ID
     const user = {
       id: userId,
       name: req.name,
       email: req.email,
-    };
+    }
     // Simulate asynchronous operation (e.g., database insertion)
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return user;
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    return user
   },
-);
+)
 
 // Create a PUT endpoint to update a user
 api.put(
@@ -102,12 +102,12 @@ api.put(
       id: req.id,
       name: req.name ?? 'John Doe',
       email: req.email ?? 'johndoe@example.com',
-    };
+    }
     // Simulate asynchronous operation (e.g., database update)
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return updatedUser;
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    return updatedUser
   },
-);
+)
 
 // Create a GET endpoint to fetch a user by ID
 api.get(
@@ -129,13 +129,13 @@ api.get(
       id: req.id,
       name: 'John Doe',
       email: 'johndoe@example.com',
-    };
-    return user;
+    }
+    return user
   },
-);
+)
 
 // Start the server
-Deno.serve({ hostname: "localhost", port: 3000 }, api.fetch);
+Deno.serve({ hostname: "localhost", port: 3000 }, api.fetch)
 ```
 
 Now take a look at your schema using `curl http://localhost:3000/openapi
