@@ -1,19 +1,25 @@
 import type { OpenAPIV3 } from "npm:openapi-types";
 
+/**
+ * Allowed HTTP methods for OpenAPI.
+ */
 export const ALLOWED_METHODS = [
     "GET",
     "PUT",
     "POST",
     "DELETE",
-// Not yet supported:
-//    "OPTIONS",
-//    "HEAD",
-//    "PATCH",
-//    "TRACE",
-  ] as const;
+    // Not yet supported:
+    //    "OPTIONS",
+    //    "HEAD",
+    //    "PATCH",
+    //    "TRACE",
+] as const;
 
 // OpenAPI Specs Options, this was copied from hono-openapi/src/types.ts but it can't be imported due to 
 // https://github.com/rhinobase/hono-openapi/issues/13
+/**
+ * Options for configuring OpenAPI specifications.
+ */
 export type OpenApiSpecsOptions = {
     /**
      * Customize OpenAPI config, refers to Swagger 2.0 config
@@ -49,4 +55,4 @@ export type OpenApiSpecsOptions = {
      * Exclude tags from OpenAPI
      */
     excludeTags?: string[];
-  };
+};
