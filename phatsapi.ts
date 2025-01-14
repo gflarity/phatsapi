@@ -1,11 +1,11 @@
-import { Hono, Context } from "npm:hono";
-import { openAPISpecs, describeRoute, DescribeRouteOptions } from 'npm:hono-openapi@0.3.1';
-import { resolver, validator as zValidator } from 'npm:hono-openapi/zod';
-import { OpenApiSpecsOptions } from './hono-openapi-types.ts';
+import { Hono, Context } from "npm:hono@4.6.16"
+import { openAPISpecs, describeRoute, DescribeRouteOptions } from 'npm:hono-openapi@0.3.1'
+import { resolver } from 'npm:hono-openapi@0.3.1/zod'
+import { OpenApiSpecsOptions } from './hono-openapi-types.ts'
 
-import { z } from 'npm:zod';
-import { extendZodWithOpenApi } from 'npm:zod-openapi';
-extendZodWithOpenApi(z);
+import { z } from 'npm:zod@3.24.1'
+import { extendZodWithOpenApi } from 'npm:zod-openapi@4.2.2'
+extendZodWithOpenApi(z)
 
 // Define the schema for validation errors
 const validationErrorSchema = z.object({
@@ -15,17 +15,17 @@ const validationErrorSchema = z.object({
       message: z.string(),
     })
   ),
-});
+})
 
 // Return zod validation error matching validationErrorSchema
 function handleZodEror(err: z.ZodError, c: Context) {
   const formattedErrors = err.errors.map((err) => ({
     field: err.path.join('.'),
     message: err.message,
-  }));
+  }))
 
   // Return a 400 Bad Request with error details
-  return c.json({ errors: formattedErrors }, 400);
+  return c.json({ errors: formattedErrors }, 400)
 }
 
 /**
@@ -40,23 +40,23 @@ async function handleRequest<
   responseSchema: ResponseSchema,
   handler: (req: z.infer<RequestSchema>) => Promise<z.infer<ResponseSchema>>,
 ) {
-  const params = c.req.param();
-  const query = c.req.query();
-  const body = await c.req.json().catch(() => ({})); // Handle potential JSON parse errors
-  let request;
+  const params = c.req.param()
+  const query = c.req.query()
+  const body = await c.req.json().catch(() => ({})) // Handle potential JSON parse errors
+  let request
   try {
-    request = await requestSchema.parseAsync({ ...params, ...query, ...body });
+    request = await requestSchema.parseAsync({ ...params, ...query, ...body })
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return handleZodEror(err, c);
+      return handleZodEror(err, c)
     }
 
     // Handle other types of errors (optional)
-    return c.json({ error: 'Internal Server Error' }, 500);
+    return c.json({ error: 'Internal Server Error' }, 500)
   }
 
-  const response = await handler(request);
-  return c.json(responseSchema.parse(response), 200);
+  const response = await handler(request)
+  return c.json(responseSchema.parse(response), 200)
 }
 
 /**
@@ -89,14 +89,14 @@ function createRouteConfig<ResponseSchema extends z.ZodTypeAny>(
         },
       },
     },
-  };
+  }
 }
 
 /**
  * PhatsAPI class for creating RESTful APIs using Hono framework with OpenAPI support.
  */
 export class PhatsAPI {
-  private hono: Hono;
+  private hono: Hono
 
   /**
    * Constructor for PhatsAPI.
@@ -110,12 +110,12 @@ export class PhatsAPI {
    *       version: '1.0.0',
    *     },
    *   },
-   * });
+   * })
    */
   constructor(openapiOptions: OpenApiSpecsOptions) {
-    this.hono = new Hono();
-    this.fetch = this.fetch.bind(this);
-    this.hono.get("/openapi", openAPISpecs(this.hono, openapiOptions));
+    this.hono = new Hono()
+    this.fetch = this.fetch.bind(this)
+    this.hono.get("/openapi", openAPISpecs(this.hono, openapiOptions))
   }
 
   /**
@@ -176,12 +176,12 @@ export class PhatsAPI {
       description,
       responseSchema,
       responseDescription,
-    );
+    )
     this.hono.post(
       path,
       describeRoute(routeConfig),
       async (c) => handleRequest(c, requestSchema, responseSchema, handler),
-    );
+    )
   }
 
   /**
@@ -209,12 +209,12 @@ export class PhatsAPI {
       description,
       responseSchema,
       responseDescription,
-    );
+    )
     this.hono.put(
       path,
       describeRoute(routeConfig),
       async (c) => handleRequest(c, requestSchema, responseSchema, handler),
-    );
+    )
   }
 
   /**
@@ -242,12 +242,12 @@ export class PhatsAPI {
       description,
       responseSchema,
       responseDescription,
-    );
+    )
     this.hono.delete(
       path,
       describeRoute(routeConfig),
       async (c) => handleRequest(c, requestSchema, responseSchema, handler),
-    );
+    )
   }
 
   /**
@@ -259,6 +259,6 @@ export class PhatsAPI {
   public fetch(
     ...args: Parameters<typeof Hono.prototype.fetch>
   ): ReturnType<typeof Hono.prototype.fetch> {
-    return this.hono.fetch(...args);
+    return this.hono.fetch(...args)
   }
 }
