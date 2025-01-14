@@ -11,7 +11,7 @@ import { PhatsAPI } from "@phatsapi/phatsapi"
 ## Example
 
 ```ts
-import { PhatsAPI } from './phatsapi.ts'
+import { PhatsAPI } from "@phatsapi/phatsapi"
 import { z } from 'npm:zod'
 import { extendZodWithOpenApi } from 'npm:zod-openapi'
 
