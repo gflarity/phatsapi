@@ -1,17 +1,4 @@
-![phatsapi](https://github.com/user-attachments/assets/da3d6ad9-bc4a-4d85-a0d6-730f41e0df3b)
-
-# PhatsAPI - Deno API Framework
-
-PhatsAPI is a lightweight and easy-to-use Deno API framework that allows you to define your API endpoints using Zod schemas. It automatically generates OpenAPI 3.0 documentation based on your schemas, so you don't have to write any additional documentation. It's based on [Hono](https://www.npmjs.com/package/hono) and [hono-openapi](https://jsr.io/@hono-openapi/hono-openapi).
-
-## Setup
-
-import { PhatsAPI } from "@phatsapi/phatsapi"
-
-## Example
-
-```ts
-iimport { PhatsAPI } from "@phatsapi/phatsapi";
+import { PhatsAPI } from "@phatsapi/phatsapi";
 import { z } from "npm:zod";
 import { extendZodWithOpenApi } from "npm:zod-openapi";
 import { bearerAuth } from "npm:hono/bearer-auth";
@@ -148,10 +135,3 @@ api.get(
 
 // Start the server
 Deno.serve({ hostname: "localhost", port: 3000 }, api.fetch);
-```
-
-Now take a look at your schema using `curl http://localhost:3000/openapi
-
-```json
-{"openapi":"3.1.0","info":{"title":"My API","description":"Development documentation","version":"1.0.0"},"servers":[{"url":"http://localhost:3000","description":"Local server"}],"paths":{"/users":{"post":{"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"email":{"type":"string","format":"email"}},"required":["id","name","email"]}}}},"400":{"description":"Bad request","content":{"application/json":{"schema":{"type":"object","properties":{"errors":{"type":"array","items":{"type":"object","properties":{"field":{"type":"string"},"message":{"type":"string"}},"required":["field","message"]}}},"required":["errors"]}}}},"500":{"description":"Internal server error","content":{"application/json":{"schema":{"type":"object","properties":{"error":{"type":"string"}},"required":["error"]}}}}},"operationId":"postUsers","description":"Create a new user"}},"/users/{id}":{"put":{"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"email":{"type":"string","format":"email"}},"required":["id","name","email"]}}}},"400":{"description":"Bad request","content":{"application/json":{"schema":{"type":"object","properties":{"errors":{"type":"array","items":{"type":"object","properties":{"field":{"type":"string"},"message":{"type":"string"}},"required":["field","message"]}}},"required":["errors"]}}}},"500":{"description":"Internal server error","content":{"application/json":{"schema":{"type":"object","properties":{"error":{"type":"string"}},"required":["error"]}}}}},"operationId":"putUsersById","description":"Update a user","parameters":[{"schema":{"type":"string"},"in":"path","name":"id","required":true}]},"get":{"responses":{"200":{"description":"Successful response","content":{"application/json":{"schema":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"email":{"type":"string","format":"email"}},"required":["id","name","email"]}}}},"400":{"description":"Bad request","content":{"application/json":{"schema":{"type":"object","properties":{"errors":{"type":"array","items":{"type":"object","properties":{"field":{"type":"string"},"message":{"type":"string"}},"required":["field","message"]}}},"required":["errors"]}}}},"500":{"description":"Internal server error","content":{"application/json":{"schema":{"type":"object","properties":{"error":{"type":"string"}},"required":["error"]}}}}},"operationId":"getUsersById","description":"Get a user by ID","parameters":[{"schema":{"type":"string"},"in":"path","name":"id","required":true}]}}},"components":{"schemas":{}}
-```
