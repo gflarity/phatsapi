@@ -1,8 +1,8 @@
-import { PhatsAPI } from "@phatsapi/phatsapi";
+import { PhatsAPI } from "../phatsapi.ts";
 import { z } from "npm:zod";
-import { extendZodWithOpenApi } from "npm:zod-openapi";
 import { bearerAuth } from "npm:hono/bearer-auth";
 
+import { extendZodWithOpenApi } from "npm:zod-openapi@4.2.2";
 extendZodWithOpenApi(z);
 
 const api = new PhatsAPI({
@@ -37,10 +37,8 @@ const createUserSchema = z.object({
     email: z.string().email(),
 });
 
-const updateUserSchema = z.object({
+const updateUserPathSchema = z.object({
     id: z.string(),
-    name: z.string().optional(),
-    email: z.string().email().optional(),
 });
 
 const requestSchema = z.object({
@@ -56,7 +54,7 @@ const userSchema = z.object({
 // Create a POST endpoint to create a user
 api.post(
     "/users",
-    createUserSchema,
+    createUserSchema, // json body is the default source
     userSchema,
     "Create a new user",
     async (req) => {
@@ -84,7 +82,7 @@ api.post(
 // Create a PUT endpoint to update a user
 api.put(
     "/users/:id",
-    updateUserSchema,
+    { param: updateUserPathSchema, json: createUserSchema },
     userSchema,
     "Update a user",
     async (req) => {
@@ -111,7 +109,7 @@ api.put(
 // Create a GET endpoint to fetch a user by ID
 api.get(
     "/users/:id",
-    requestSchema,
+    { param: requestSchema },
     userSchema,
     "Get a user by ID",
     async (req) => {
