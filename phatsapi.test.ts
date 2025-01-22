@@ -333,3 +333,131 @@ Deno.test("PhatsAPI openapi endpoint", async () => {
     assertEquals(json.info.title, "PhatsAPI");
     assertEquals(json.info.version, "1.0.0");
 });
+
+Deno.test("PhatsAPI POST method without compound schema", async () => {
+    const api = createTestAPI();
+    const requestSchema = z.object({
+        name: userNameSchema,
+    });
+
+    const responseSchema = userSchema;
+
+    api.post(
+        "/users",
+        requestSchema,
+        responseSchema,
+        "Creates a new user",
+        async (req) => {
+            return { id: 1, name: req.name };
+        }
+    );
+
+    await testRequest(
+        api,
+        "POST",
+        "/users",
+        {
+            body: JSON.stringify({ name: "Jane Doe" }),
+            headers: { "Content-Type": "application/json" },
+        },
+        200,
+        { id: 1, name: "Jane Doe" }
+    );
+    await testRequest(
+        api,
+        "POST",
+        "/users",
+        {
+            body: JSON.stringify({}),
+            headers: { "Content-Type": "application/json" },
+        },
+        400
+    ); // Missing 'name'
+});
+
+Deno.test("PhatsAPI PUT method without compound schema", async () => {
+    const api = createTestAPI("User Management API");
+
+    const requestSchema = z.object({
+        id: userIdSchema,
+        name: userNameSchema,
+    });
+
+    const responseSchema = userSchema;
+
+    api.put(
+        "/users",
+        requestSchema,
+        responseSchema,
+        "Updates a user",
+        async (req) => {
+            return { id: req.id, name: req.name };
+        }
+    );
+
+    await testRequest(
+        api,
+        "PUT",
+        "/users",
+        {
+            body: JSON.stringify({ id: 2, name: "Updated Name" }),
+            headers: { "Content-Type": "application/json" },
+        },
+        200,
+        { id: 2, name: "Updated Name" }
+    );
+    await testRequest(
+        api,
+        "PUT",
+        "/users",
+        {
+            body: JSON.stringify({}),
+            headers: { "Content-Type": "application/json" },
+        },
+        400
+    ); // Missing 'id' or 'name'
+});
+
+Deno.test("PhatsAPI DELETE method without compound schema", async () => {
+    const api = createTestAPI("User API");
+
+    const requestSchema = z.object({
+        id: userIdSchema,
+    });
+
+    const responseSchema = z.object({
+        message: messageSchema,
+    });
+
+    api.delete(
+        "/users",
+        requestSchema,
+        responseSchema,
+        "Deletes a user",
+        async (req) => {
+            return { message: "User deleted" };
+        }
+    );
+
+    await testRequest(
+        api,
+        "DELETE",
+        "/users",
+        {
+            body: JSON.stringify({ id: 1 }),
+            headers: { "Content-Type": "application/json" },
+        },
+        200,
+        { message: "User deleted" }
+    );
+    await testRequest(
+        api,
+        "DELETE",
+        "/users",
+        {
+            body: JSON.stringify({}),
+            headers: { "Content-Type": "application/json" },
+        },
+        400
+    ); // Missing 'id'
+});
